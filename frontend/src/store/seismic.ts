@@ -72,11 +72,6 @@ export const useSeismicStore = defineStore('seismic', () => {
 
   function loadMockData() {
     waveform.value = generateMockWaveform()
-    picks.value = [
-      { id: 'p1', type: 'P', time: 10.2, confidence: 0.92, method: 'STA/LTA' },
-      { id: 'p2', type: 'S', time: 22.5, confidence: 0.88, method: 'STA/LTA' },
-    ]
-    hasRunPicking.value = true
   }
 
   function staLtaPicking(): PhasePick[] {
@@ -125,6 +120,9 @@ export const useSeismicStore = defineStore('seismic', () => {
         const data = await resp.json()
         waveform.value = data.waveform
         picks.value = data.picks || []
+        if ('picks' in data) {
+          hasRunPicking.value = true
+        }
       }
     } catch {
       loadMockData()
