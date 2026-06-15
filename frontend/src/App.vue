@@ -42,7 +42,11 @@
           <span>{{ p.time.toFixed(2) }}s</span>
           <span class="text-gray-400">{{ (p.confidence * 100).toFixed(0) }}%</span>
         </div>
-        <div v-if="!store.picks.length" class="text-gray-600 text-xs">加载数据后运行拾取</div>
+        <div v-if="!store.picks.length" class="text-gray-600 text-xs">
+          <span v-if="!store.waveform">请先上传或加载数据</span>
+          <span v-else-if="!store.hasRunPicking">点击"运行自动拾取"开始检测</span>
+          <span v-else>当前参数未拾取到震相，请调整后重试</span>
+        </div>
       </div>
 
       <!-- Stations -->
@@ -69,8 +73,37 @@
     <!-- Main: Waveform Charts -->
     <div class="flex-1 flex flex-col gap-2 p-4 overflow-y-auto">
       <WaveformChart v-if="store.waveform" />
-      <div v-else class="flex-1 flex items-center justify-center text-gray-600">
-        请上传数据或加载模拟波形
+      <div v-else class="flex-1 flex items-center justify-center">
+        <div class="text-center max-w-sm">
+          <div class="text-5xl mb-4">📊</div>
+          <h2 class="text-gray-300 text-lg font-medium mb-2">暂无波形数据</h2>
+          <p class="text-gray-500 text-sm mb-4">请先上传 SAC/miniSEED 文件或加载模拟数据以开始分析</p>
+          <div class="flex gap-2 justify-center">
+            <label class="bg-cyan-500 text-black px-4 py-2 rounded cursor-pointer hover:bg-cyan-400 text-sm font-medium">
+              上传文件
+              <input type="file" @change="onUpload" class="hidden" />
+            </label>
+            <button @click="store.loadMockData()" class="bg-gray-800 px-4 py-2 rounded text-sm hover:bg-gray-700">
+              加载模拟数据
+            </button>
+          </div>
+        </div>
+      </div>
+      <div v-if="store.waveform && !store.picks.length && !store.hasRunPicking" class="bg-gray-800/50 rounded-xl p-6 text-center border border-gray-700">
+        <div class="text-3xl mb-3">⚙️</div>
+        <h3 class="text-gray-300 text-base font-medium mb-2">波形已就绪，尚未运行拾取</h3>
+        <p class="text-gray-500 text-sm mb-4">调整左侧 STA/LTA 参数后，点击"运行自动拾取"检测 P/S 波到达时间</p>
+        <button @click="runPick" class="bg-cyan-600 px-5 py-2 rounded text-sm hover:bg-cyan-500">
+          运行自动拾取
+        </button>
+      </div>
+      <div v-if="store.waveform && !store.picks.length && store.hasRunPicking" class="bg-gray-800/50 rounded-xl p-6 text-center border border-gray-700">
+        <div class="text-3xl mb-3">🔍</div>
+        <h3 class="text-gray-300 text-base font-medium mb-2">未检测到震相</h3>
+        <p class="text-gray-500 text-sm mb-4">当前参数下未拾取到 P/S 波，可尝试降低触发阈值或调整 STA/LTA 窗口后重新运行</p>
+        <button @click="runPick" class="bg-cyan-600 px-5 py-2 rounded text-sm hover:bg-cyan-500">
+          重新拾取
+        </button>
       </div>
     </div>
   </div>
@@ -89,5 +122,6 @@ function onUpload(e: Event) {
 
 function runPick() {
   store.picks = store.staLtaPicking()
+  store.hasRunPicking = true
 }
 </script>

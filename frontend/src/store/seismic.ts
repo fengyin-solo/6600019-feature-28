@@ -10,6 +10,7 @@ export const useSeismicStore = defineStore('seismic', () => {
   const ltaWindow = ref(10.0)
   const threshold = ref(3.5)
   const isLoading = ref(false)
+  const hasRunPicking = ref(false)
   const events = ref<SeismicEvent[]>([
     { id: '1', magnitude: 4.2, depth: 12.5, originTime: '2025-01-15T08:23:41Z', location: '四川雅安' },
     { id: '2', magnitude: 3.8, depth: 8.3, originTime: '2025-01-14T14:12:05Z', location: '云南大理' },
@@ -75,6 +76,7 @@ export const useSeismicStore = defineStore('seismic', () => {
       { id: 'p1', type: 'P', time: 10.2, confidence: 0.92, method: 'STA/LTA' },
       { id: 'p2', type: 'S', time: 22.5, confidence: 0.88, method: 'STA/LTA' },
     ]
+    hasRunPicking.value = true
   }
 
   function staLtaPicking(): PhasePick[] {
@@ -133,7 +135,7 @@ export const useSeismicStore = defineStore('seismic', () => {
 
   return {
     waveform, picks, selectedStation, staWindow, ltaWindow, threshold,
-    isLoading, events, stations,
+    isLoading, hasRunPicking, events, stations,
     loadMockData, staLtaPicking, uploadAndAnalyze, generateMockWaveform
   }
 })
